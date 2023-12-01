@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 fn main() {
     let input  = include_str!("./input2.txt");
     let result = part2(input);
@@ -44,7 +42,6 @@ fn part2(input: &str) -> i32 {
             }
         }
 
-        println!("orig: {} f: {}, l: {}", line, first, last);
         return format!("{}{}", first, last);
     }).collect();
     //

@@ -27,5 +27,5 @@ fn part2(input: &str) -> i32 {
 
     let result = occurances.iter().cloned().reduce(|a, b| a + b).unwrap();
 
-    return result.clone();
+    return result;
 }

@@ -21,7 +21,6 @@ fn part2(input: &str) -> i32 {
 
     for (index , match_a) in matches_amount.iter().enumerate() {
         for n in index+1..index+match_a+1{
-            // println!("{} m_a {} {}..{}", n, match_a, index, index+match_a);
             occurances[n] = occurances[n] + occurances[index];
         }
     }

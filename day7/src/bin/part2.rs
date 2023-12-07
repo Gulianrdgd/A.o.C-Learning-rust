@@ -49,6 +49,12 @@ fn part2(input: &str) -> i32 {
 
     sorted_hands.sort();
 
+    for i in 0..sorted_hands.len(){
+        // if sorted_hands[i].hand.contains("J") {
+            println!("{}: {} pow: {}", i, sorted_hands[i].hand, sorted_hands[i].hand_power);
+        // }
+    }
+
     let result = sorted_hands.iter().enumerate().map(|(index, ex_hand)| ((index as i32 ) +1 )*ex_hand.hand_number).reduce(|a, b| a+ b).unwrap();
 
 
@@ -85,6 +91,11 @@ fn decide_hand(oc: Vec<Occurrence>) -> usize {
         // Five of a kind
         return 6;
     }else if same_cards == 2{
+        if oc[0].val == 'J' || oc[1].val == 'J'{
+            // Five of kind
+            return 6;
+        }
+
         return if (oc[0].amount == 2 && oc[1].amount == 3) || (oc[0].amount == 3 && oc[1].amount == 2) {
             // Full house
             4
@@ -93,19 +104,57 @@ fn decide_hand(oc: Vec<Occurrence>) -> usize {
             5
         }
     } else if same_cards == 3{
-        return if (oc[0].amount == 3 && oc[1].amount == 1) ||
+        if oc[0].val == 'J' || oc[1].val == 'J' || oc[2].val == 'J' {
+            for o in oc.iter() {
+                if o.amount == 3 {
+                    return 5;
+                }
+                if o.val == 'J' {
+                    if o.amount == 2 {
+                        return 5;
+                    }
+                }
+            }
+            return 4;
+        }
+
+        // if oc[0].val == 'J' || oc[1].val == 'J' || oc[2].val == 'J'{
+        //
+        //     for o in oc.iter(){
+        //         if o.amount == 3{
+        //             return 5;
+        //         }
+        //     }
+        //
+        //     return 4;
+        // }
+
+
+            if (oc[0].amount == 3 && oc[1].amount == 1) ||
             (oc[1].amount == 3 && oc[0].amount == 1) ||
             (oc[2].amount == 3 && oc[0].amount == 1) {
+
             // Three of a kind
-            3
+            return 3;
         } else {
             // Two pair
-            2
+            return 2;
         }
     }else if same_cards == 4{
+        for o in oc.iter(){
+            if o.val == 'J'{
+                return 3;
+            }
+        }
         // One pair
         return 1;
     }else if same_cards == 5 {
+        for o in oc.iter(){
+            if o.val == 'J'{
+                return 1;
+            }
+        }
+
         // High card
         return 0
     }
@@ -119,7 +168,7 @@ fn transform_to_number(ch: char) -> i32 {
     }
 
     if ch == 'J' {
-        return 11;
+        return 1;
     }
 
     if ch == 'Q'{

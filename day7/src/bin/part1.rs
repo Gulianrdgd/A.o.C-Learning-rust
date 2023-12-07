@@ -1,29 +1,58 @@
+use std::cmp::Ordering;
+
 fn main() {
     let input  = include_str!("./input1.txt");
     let result = part1(input);
     println!("{}", result);
 }
 
+#[derive(Ord, Eq)]
+struct ExtendedHand {
+    hand: String,
+    hand_power: usize,
+    hand_number: i32,
+}
+
+impl PartialEq<Self> for ExtendedHand {
+    fn eq(&self, other: &Self) -> bool {
+        self.hand_power == other.hand_power && self.hand == other.hand
+    }
+}
+
+impl PartialOrd for ExtendedHand {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        if self.hand_power == other.hand_power {
+            return Some(cmp_hands(&self.hand, &other.hand));
+        }
+        Some(self.hand_power.cmp(&other.hand_power))
+    }
+}
+
+
 fn part1(input: &str) -> i32 {
-    let hands = input.clone().lines().map(|a| {
+    let hands = input.lines().map(|a| {
         let mut splitted = a.split(" ").clone();
         return (splitted.nth(0).unwrap(), splitted.nth(0).unwrap().parse::<i32>().unwrap())
     }).collect::<Vec<(&str,i32)>>();
 
-    let result = hands.iter().map(|(hand, num)| {
+    let mut sorted_hands = hands.iter().map(|(hand, num)| {
         let oc_num = get_number_of_ocurrances(hand);
         let hand_power = decide_hand(oc_num);
 
-        return (hand, (hand_power, num));
+        return ExtendedHand{
+            hand: hand.to_string(),
+            hand_power,
+            hand_number: num.clone(),
+        }
     }
-    ).collect::<Vec<(&str, (usize, i32))>>().sort_by(|(a, (b, c)), (e, (f, g))|  b.partial_cmp(f).unwrap());
-    // for (hand, num) in hands{
-    //     let mut occurances = get_number_of_ocurrances(hand);
-    //
-    // }
+    ).collect::<Vec<ExtendedHand>>();
+
+    sorted_hands.sort();
+
+    let result = sorted_hands.iter().enumerate().map(|(index, ex_hand)| ((index as i32 ) +1 )*ex_hand.hand_number).reduce(|a, b| a+ b).unwrap();
 
 
-    return result.unwrap();
+    return result;
 }
 
 struct Occurrence {
@@ -64,9 +93,9 @@ fn decide_hand(oc: Vec<Occurrence>) -> usize {
             5
         }
     } else if same_cards == 3{
-        return if ((oc[0].amount == 3 && oc[1].amount == 1) ||
+        return if (oc[0].amount == 3 && oc[1].amount == 1) ||
             (oc[1].amount == 3 && oc[0].amount == 1) ||
-            (oc[2].amount == 3 && oc[0].amount == 1)) {
+            (oc[2].amount == 3 && oc[0].amount == 1) {
             // Three of a kind
             3
         } else {
@@ -82,4 +111,51 @@ fn decide_hand(oc: Vec<Occurrence>) -> usize {
     }
 
     return 0;
+}
+
+fn transform_to_number(ch: char) -> i32 {
+    if ch == 'T' {
+        return 10;
+    }
+
+    if ch == 'J' {
+        return 11;
+    }
+
+    if ch == 'Q'{
+        return 12;
+    }
+
+    if ch == 'K'{
+        return 13;
+    }
+
+    if ch == 'A'{
+        return 14
+    }
+
+    return ch.to_digit(10).unwrap() as i32;
+}
+
+fn cmp_hands(hand1: &str, hand2: &str) -> Ordering{
+    if hand1 == hand2{
+        return Ordering::Equal;
+    }
+
+    let h1_c = hand1.chars().map(|a| a).collect::<Vec<char>>();
+    let h2_c = hand2.chars().map(|a| a).collect::<Vec<char>>();
+
+    for i in 0..h1_c.len(){
+        let h1_conv = transform_to_number(h1_c[i]);
+        let h2_conv = transform_to_number(h2_c[i]);
+        if h1_conv == h2_conv {
+            continue;
+        }else if h1_conv > h2_conv {
+            return Ordering::Greater;
+        }else{
+            return Ordering::Less;
+        }
+    }
+
+    return Ordering::Less;
 }
